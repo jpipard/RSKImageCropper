@@ -328,8 +328,11 @@ static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
         _moveAndScaleLabel = [[UILabel alloc] init];
         _moveAndScaleLabel.translatesAutoresizingMaskIntoConstraints = NO;
         _moveAndScaleLabel.backgroundColor = [UIColor clearColor];
-        _moveAndScaleLabel.text = RSKLocalizedString(@"Move and Scale", @"Move and Scale label");
         _moveAndScaleLabel.textColor = [UIColor whiteColor];
+        _moveAndScaleLabel.text = NSLocalizedString(@"crop.help", );
+        _moveAndScaleLabel.numberOfLines = 2;
+        _moveAndScaleLabel.textAlignment = NSTextAlignmentCenter;
+        _moveAndScaleLabel.font = [UIFont fontWithName:@"OpenSans" size:15.0f];
         _moveAndScaleLabel.opaque = NO;
     }
     return _moveAndScaleLabel;
@@ -746,6 +749,7 @@ static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
 - (void)layoutOverlayView
 {
     CGRect frame = CGRectMake(0, 0, CGRectGetWidth(self.view.bounds) * 2, CGRectGetHeight(self.view.bounds) * 2);
+    self.overlayView.alpha = 0.8;
     self.overlayView.frame = frame;
 }
 
