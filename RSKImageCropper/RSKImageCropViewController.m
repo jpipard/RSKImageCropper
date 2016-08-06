@@ -330,9 +330,9 @@ static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
         _moveAndScaleLabel.backgroundColor = [UIColor clearColor];
         _moveAndScaleLabel.textColor = [UIColor whiteColor];
         _moveAndScaleLabel.text = NSLocalizedString(@"crop.help", );
-        _moveAndScaleLabel.numberOfLines = 2;
+        _moveAndScaleLabel.numberOfLines = 0;
         _moveAndScaleLabel.textAlignment = NSTextAlignmentCenter;
-        _moveAndScaleLabel.font = [UIFont fontWithName:@"OpenSans" size:15.0f];
+        _moveAndScaleLabel.font = [UIFont fontWithName:@"OpenSans" size:16.0f];
         _moveAndScaleLabel.opaque = NO;
     }
     return _moveAndScaleLabel;
