@@ -140,6 +140,7 @@ static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
                                                               target:self
                                                               action:@selector(onChooseButtonTouch:)];
     [button setBackgroundImage:[UIImage new] forState:UIControlStateNormal barMetrics:UIBarMetricsDefault];
+    [button setTintColor:[UIColor colorWithRed:244.0/255.0 green:124.0/255.0 blue:110.0/255.0 alpha:1.0]];
     self.navigationItem.rightBarButtonItem = button;
     
     [self.view addSubview:self.imageScrollView];
