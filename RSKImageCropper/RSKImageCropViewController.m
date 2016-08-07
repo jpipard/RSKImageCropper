@@ -58,18 +58,12 @@ static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
 @property (readonly, nonatomic) CGRect rectForClipPath;
 
 @property (strong, nonatomic) UILabel *moveAndScaleLabel;
-@property (strong, nonatomic) UIButton *cancelButton;
-@property (strong, nonatomic) UIButton *chooseButton;
 
 @property (strong, nonatomic) UITapGestureRecognizer *doubleTapGestureRecognizer;
 @property (strong, nonatomic) UIRotationGestureRecognizer *rotationGestureRecognizer;
 
 @property (assign, nonatomic) BOOL didSetupConstraints;
 @property (strong, nonatomic) NSLayoutConstraint *moveAndScaleLabelTopConstraint;
-@property (strong, nonatomic) NSLayoutConstraint *cancelButtonBottomConstraint;
-@property (strong, nonatomic) NSLayoutConstraint *cancelButtonLeadingConstraint;
-@property (strong, nonatomic) NSLayoutConstraint *chooseButtonBottomConstraint;
-@property (strong, nonatomic) NSLayoutConstraint *chooseButtonTrailingConstraint;
 
 @end
 
@@ -89,7 +83,7 @@ static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
         
         _portraitCircleMaskRectInnerEdgeInset = 15.0f;
         _portraitSquareMaskRectInnerEdgeInset = 20.0f;
-        _portraitMoveAndScaleLabelTopAndCropViewTopVerticalSpace = 64.0f;
+        _portraitMoveAndScaleLabelTopAndCropViewTopVerticalSpace = 34.0f;
         _portraitCropViewBottomAndCancelButtonBottomVerticalSpace = 21.0f;
         _portraitCropViewBottomAndChooseButtonBottomVerticalSpace = 21.0f;
         _portraitCancelButtonLeadingAndCropViewLeadingHorizontalSpace = 13.0f;
@@ -140,54 +134,20 @@ static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
     
     self.view.backgroundColor = [UIColor blackColor];
     self.view.clipsToBounds = YES;
+
+    UIBarButtonItem *button = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"crop.choose",)
+                                                               style:UIBarButtonItemStylePlain
+                                                              target:self
+                                                              action:@selector(onChooseButtonTouch:)];
+    [button setBackgroundImage:[UIImage new] forState:UIControlStateNormal barMetrics:UIBarMetricsDefault];
+    self.navigationItem.rightBarButtonItem = button;
     
     [self.view addSubview:self.imageScrollView];
     [self.view addSubview:self.overlayView];
     [self.view addSubview:self.moveAndScaleLabel];
-    [self.view addSubview:self.cancelButton];
-    [self.view addSubview:self.chooseButton];
-    
+
     [self.view addGestureRecognizer:self.doubleTapGestureRecognizer];
     [self.view addGestureRecognizer:self.rotationGestureRecognizer];
-}
-
-- (void)viewWillAppear:(BOOL)animated
-{
-    [super viewWillAppear:animated];
-    
-    UIApplication *application = [UIApplication rsk_sharedApplication];
-    if (application) {
-        self.originalStatusBarHidden = application.statusBarHidden;
-        [application setStatusBarHidden:YES];
-    }
-    
-    self.originalNavigationControllerNavigationBarHidden = self.navigationController.navigationBarHidden;
-    [self.navigationController setNavigationBarHidden:YES animated:NO];
-    
-    self.originalNavigationControllerNavigationBarShadowImage = self.navigationController.navigationBar.shadowImage;
-    self.navigationController.navigationBar.shadowImage = nil;
-}
-
-- (void)viewDidAppear:(BOOL)animated
-{
-    [super viewDidAppear:animated];
-    
-    self.originalNavigationControllerViewBackgroundColor = self.navigationController.view.backgroundColor;
-    self.navigationController.view.backgroundColor = [UIColor blackColor];
-}
-
-- (void)viewWillDisappear:(BOOL)animated
-{
-    [super viewWillDisappear:animated];
-    
-    UIApplication *application = [UIApplication rsk_sharedApplication];
-    if (application) {
-        [application setStatusBarHidden:self.originalStatusBarHidden];
-    }
-    
-    [self.navigationController setNavigationBarHidden:self.originalNavigationControllerNavigationBarHidden animated:animated];
-    self.navigationController.navigationBar.shadowImage = self.originalNavigationControllerNavigationBarShadowImage;
-    self.navigationController.view.backgroundColor = self.originalNavigationControllerViewBackgroundColor;
 }
 
 - (void)viewWillLayoutSubviews
@@ -230,53 +190,7 @@ static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
                                                                             constant:constant];
         [self.view addConstraint:self.moveAndScaleLabelTopConstraint];
         
-        // --------------------
-        // The button "Cancel".
-        // --------------------
-        
-        constant = self.portraitCancelButtonLeadingAndCropViewLeadingHorizontalSpace;
-        self.cancelButtonLeadingConstraint = [NSLayoutConstraint constraintWithItem:self.cancelButton attribute:NSLayoutAttributeLeading relatedBy:NSLayoutRelationEqual
-                                                                             toItem:self.view attribute:NSLayoutAttributeLeading multiplier:1.0f
-                                                                           constant:constant];
-        [self.view addConstraint:self.cancelButtonLeadingConstraint];
-        
-        constant = self.portraitCropViewBottomAndCancelButtonBottomVerticalSpace;
-        self.cancelButtonBottomConstraint = [NSLayoutConstraint constraintWithItem:self.view attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual
-                                                                            toItem:self.cancelButton attribute:NSLayoutAttributeBottom multiplier:1.0f
-                                                                          constant:constant];
-        [self.view addConstraint:self.cancelButtonBottomConstraint];
-        
-        // --------------------
-        // The button "Choose".
-        // --------------------
-        
-        constant = self.portraitCropViewTrailingAndChooseButtonTrailingHorizontalSpace;
-        self.chooseButtonTrailingConstraint = [NSLayoutConstraint constraintWithItem:self.view attribute:NSLayoutAttributeTrailing relatedBy:NSLayoutRelationEqual
-                                                                              toItem:self.chooseButton attribute:NSLayoutAttributeTrailing multiplier:1.0f
-                                                                            constant:constant];
-        [self.view addConstraint:self.chooseButtonTrailingConstraint];
-        
-        constant = self.portraitCropViewBottomAndChooseButtonBottomVerticalSpace;
-        self.chooseButtonBottomConstraint = [NSLayoutConstraint constraintWithItem:self.view attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual
-                                                                            toItem:self.chooseButton attribute:NSLayoutAttributeBottom multiplier:1.0f
-                                                                          constant:constant];
-        [self.view addConstraint:self.chooseButtonBottomConstraint];
-        
         self.didSetupConstraints = YES;
-    } else {
-        if ([self isPortraitInterfaceOrientation]) {
-            self.moveAndScaleLabelTopConstraint.constant = self.portraitMoveAndScaleLabelTopAndCropViewTopVerticalSpace;
-            self.cancelButtonBottomConstraint.constant = self.portraitCropViewBottomAndCancelButtonBottomVerticalSpace;
-            self.cancelButtonLeadingConstraint.constant = self.portraitCancelButtonLeadingAndCropViewLeadingHorizontalSpace;
-            self.chooseButtonBottomConstraint.constant = self.portraitCropViewBottomAndChooseButtonBottomVerticalSpace;
-            self.chooseButtonTrailingConstraint.constant = self.portraitCropViewTrailingAndChooseButtonTrailingHorizontalSpace;
-        } else {
-            self.moveAndScaleLabelTopConstraint.constant = self.landscapeMoveAndScaleLabelTopAndCropViewTopVerticalSpace;
-            self.cancelButtonBottomConstraint.constant = self.landscapeCropViewBottomAndCancelButtonBottomVerticalSpace;
-            self.cancelButtonLeadingConstraint.constant = self.landscapeCancelButtonLeadingAndCropViewLeadingHorizontalSpace;
-            self.chooseButtonBottomConstraint.constant = self.landscapeCropViewBottomAndChooseButtonBottomVerticalSpace;
-            self.chooseButtonTrailingConstraint.constant = self.landscapeCropViewTrailingAndChooseButtonTrailingHorizontalSpace;
-        }
     }
 }
 
@@ -332,34 +246,10 @@ static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
         _moveAndScaleLabel.text = NSLocalizedString(@"crop.help", );
         _moveAndScaleLabel.numberOfLines = 0;
         _moveAndScaleLabel.textAlignment = NSTextAlignmentCenter;
-        _moveAndScaleLabel.font = [UIFont fontWithName:@"OpenSans" size:16.0f];
+        _moveAndScaleLabel.font = [UIFont fontWithName:@"OpenSans" size:14.0f];
         _moveAndScaleLabel.opaque = NO;
     }
     return _moveAndScaleLabel;
-}
-
-- (UIButton *)cancelButton
-{
-    if (!_cancelButton) {
-        _cancelButton = [[UIButton alloc] init];
-        _cancelButton.translatesAutoresizingMaskIntoConstraints = NO;
-        [_cancelButton setTitle:RSKLocalizedString(@"Cancel", @"Cancel button") forState:UIControlStateNormal];
-        [_cancelButton addTarget:self action:@selector(onCancelButtonTouch:) forControlEvents:UIControlEventTouchUpInside];
-        _cancelButton.opaque = NO;
-    }
-    return _cancelButton;
-}
-
-- (UIButton *)chooseButton
-{
-    if (!_chooseButton) {
-        _chooseButton = [[UIButton alloc] init];
-        _chooseButton.translatesAutoresizingMaskIntoConstraints = NO;
-        [_chooseButton setTitle:RSKLocalizedString(@"Choose", @"Choose button") forState:UIControlStateNormal];
-        [_chooseButton addTarget:self action:@selector(onChooseButtonTouch:) forControlEvents:UIControlEventTouchUpInside];
-        _chooseButton.opaque = NO;
-    }
-    return _chooseButton;
 }
 
 - (UITapGestureRecognizer *)doubleTapGestureRecognizer
